@@ -2,77 +2,79 @@ services:
 
   btcpayserver:
     restart: unless-stopped
-    image: ${BTCPAY_IMAGE:-btcpayserver/btcpayserver:1.13.7-altcoins}
+    build:
+      context: btcpayserver
     container_name: btcpayserver
     expose:
-    - "49392"
+      - 49392
     environment:
       BTCPAY_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=btcpayserver;Database=btcpayserver${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_EXPLORERPOSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=btcpayserver;MaxPoolSize=80;Database=nbxplorer${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_NETWORK: ${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_BIND: 0.0.0.0:49392
       BTCPAY_ROOTPATH: ${BTCPAY_ROOTPATH:-/}
-      BTCPAY_SSHCONNECTION: "root@host.docker.internal"
+      BTCPAY_SSHCONNECTION: root@host.docker.internal
       BTCPAY_SSHTRUSTEDFINGERPRINTS: ${BTCPAY_SSHTRUSTEDFINGERPRINTS}
       BTCPAY_SSHKEYFILE: ${BTCPAY_SSHKEYFILE}
       BTCPAY_SSHAUTHORIZEDKEYS: ${BTCPAY_SSHAUTHORIZEDKEYS}
       BTCPAY_DEBUGLOG: btcpay.log
-      BTCPAY_UPDATEURL: https://api.github.com/repos/btcpayserver/btcpayserver/releases/latest
-      BTCPAY_DOCKERDEPLOYMENT: "true"
-      BTCPAY_CHAINS: "xmr"
-      BTCPAY_XMR_DAEMON_URI: http://wownerod:34568
-      BTCPAY_XMR_WALLET_DAEMON_URI: http://wownerod_wallet:8000
-      BTCPAY_XMR_WALLET_DAEMON_WALLETDIR: /root/xmr_wallet
+      BTCPAY_UPDATEURLz: https://api.github.com/repos/btcpayserver/btcpayserver/releases/latest
+      BTCPAY_DOCKERDEPLOYMENT: true
+      BTCPAY_CHAINS: wow
+      BTCPAYGEN_CRYPTO1: xmr
+      BTCPAY_WOW_DAEMON_URI: http://wownerod:34568
+      BTCPAY_WOW_WALLET_DAEMON_URI: http://wownerod_wallet:8000
+      BTCPAY_WOW_WALLET_DAEMON_WALLETDIR: /wallet
       HIDDENSERVICE_NAME: BTCPayServer
       HIDDENSERVICE_REVERSEPROXY: nginx
       BTCPAY_TORRCFILE: /usr/local/etc/tor/torrc-2
       BTCPAY_SOCKSENDPOINT: tor:9050
     labels:
-      traefik.enable: "false"
+      traefik.enable: false
       traefik.http.routers.btcpayserver.rule: Host(`${BTCPAY_HOST}`)
     ports:
       - 127.0.0.1:49392:49392
     links:
-    - postgres
+      - postgres
     volumes:
-    - "btcpay_datadir:/datadir"
-    - "nbxplorer_datadir:/root/.nbxplorer"
-    - "btcpay_pluginsdir:/root/.btcpayserver/Plugins"
-    - "./data:/root/xmr_wallet"
-    - "tor_servicesdir:/var/lib/tor/hidden_services"
-    - "tor_torrcdir:/usr/local/etc/tor/"
+      - btcpay_datadir:/datadir
+      - nbxplorer_datadir:/root/.nbxplorer
+      - btcpay_pluginsdir:/root/.btcpayserver/Plugins
+      - ./data/wallet:/wallet
+      - tor_servicesdir:/var/lib/tor/hidden_services
+      - tor_torrcdir:/usr/local/etc/tor/
 
   wownerod:
     restart: unless-stopped
     build:
       context: .
     container_name: btcpayserver_wownerod
-    entrypoint: wownerod --rpc-bind-ip=0.0.0.0 --confirm-external-bind --rpc-bind-port=34568 --non-interactive --block-notify="/usr/bin/curl -X GET http://btcpayserver:49392/monerolikedaemoncallback/block?cryptoCode=wow&hash=%s" --hide-my-port --enable-dns-blocklist
+    entrypoint: wownerod --rpc-bind-ip=0.0.0.0 --confirm-external-bind --rpc-bind-port=34568 --non-interactive --block-notify="/usr/bin/curl -s -X GET http://btcpayserver:49392/wownerolikedaemoncallback/block?cryptoCode=wow&hash=%s" --hide-my-port --enable-dns-blocklist
     expose:
-    - "34568"
+      - 34568
     volumes:
-    - "${DATA_PATH:-./data}:/root/.wownero"
+      - ${DATA_PATH:-./data/lmdb}:/root/.wownero
 
-  wownerod_wallet:
+  wallet:
     restart: unless-stopped
     build:
       context: .
-    container_name: btcpayserver_wownero_wallet
+    container_name: btcpayserver_wallet
     command:
       bash /run_wallet.sh "${WALLET_PASS:-walletpass}" "http://wownerod:34568"
     expose:
-    - "34568"
+      - 34568
     volumes:
-    - "./data:/data"
+      - ./data/wallet:/wallet
     depends_on:
-    - wownerod
+      - wownerod
 
   nbxplorer:
     restart: unless-stopped
     image: nicolasdorier/nbxplorer:2.5.14
     container_name: btcpayserver_nbxplorer
     expose:
-    - "32838"
+    - 32838
     environment:
       NBXPLORER_NETWORK: ${NBITCOIN_NETWORK:-mainnet}
       NBXPLORER_BIND: 0.0.0.0:32838
@@ -80,9 +82,9 @@ services:
       NBXPLORER_SIGNALFILESDIR: /datadir
       NBXPLORER_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorer${NBITCOIN_NETWORK:-mainnet}
     links:
-    - postgres
+      - postgres
     volumes:
-    - "nbxplorer_datadir:/datadir"
+      - nbxplorer_datadir:/datadir
 
   postgres:
     restart: unless-stopped
@@ -93,7 +95,7 @@ services:
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
-    - "postgres_datadir:/var/lib/postgresql/data"
+      - postgres_datadir:/var/lib/postgresql/data
 
   tor:
     restart: unless-stopped
@@ -105,29 +107,28 @@ services:
       TOR_EXTRA_ARGS: |
         CookieAuthentication 1
     expose:
-    - "9050"
-    - "9051"
+      - 9050
+      - 9051
     volumes:
-    - "tor_datadir:/home/tor/.tor"
-    - "tor_torrcdir:/usr/local/etc/tor"
-    - "tor_servicesdir:/var/lib/tor/hidden_services"
+      - tor_datadir:/home/tor/.tor
+      - tor_torrcdir:/usr/local/etc/tor
+      - tor_servicesdir:/var/lib/tor/hidden_services
 
   tor-gen:
     restart: unless-stopped
     image: btcpayserver/docker-gen:0.10.7
     container_name: btcpayserver_tor-gen
     volumes:
-    - "/var/run/docker.sock:/tmp/docker.sock:ro"
-    - "./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro"
-    - "tor_torrcdir:/usr/local/etc/tor"
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro
+      - tor_torrcdir:/usr/local/etc/tor
     entrypoint: /usr/local/bin/docker-gen -notify-sighup tor -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
     links:
-    - tor
+      - tor
 
 volumes:
   btcpay_datadir:
   btcpay_pluginsdir:
-  xmr_wallet:
   xmr_data:
   nbxplorer_datadir:
   postgres_datadir:
