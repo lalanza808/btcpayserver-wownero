@@ -17,19 +17,12 @@ services:
       BTCPAY_SSHKEYFILE: ${BTCPAY_SSHKEYFILE}
       BTCPAY_SSHAUTHORIZEDKEYS: ${BTCPAY_SSHAUTHORIZEDKEYS}
       BTCPAY_DEBUGLOG: btcpay.log
-      BTCPAY_UPDATEURLz: https://api.github.com/repos/btcpayserver/btcpayserver/releases/latest
+      BTCPAY_UPDATEURL: https://api.github.com/repos/lalanza808/btcpayserver/releases/latest
       BTCPAY_DOCKERDEPLOYMENT: true
       BTCPAY_CHAINS: wow
       BTCPAY_WOW_DAEMON_URI: http://wownerod:34568
       BTCPAY_WOW_WALLET_DAEMON_URI: http://wallet:8000
       BTCPAY_WOW_WALLET_DAEMON_WALLETDIR: /wallet
-      HIDDENSERVICE_NAME: BTCPayServer
-      HIDDENSERVICE_REVERSEPROXY: nginx
-      BTCPAY_TORRCFILE: /usr/local/etc/tor/torrc-2
-      BTCPAY_SOCKSENDPOINT: tor:9050
-    labels:
-      traefik.enable: false
-      traefik.http.routers.btcpayserver.rule: Host(`${BTCPAY_HOST}`)
     ports:
       - 127.0.0.1:49392:49392
     links:
@@ -38,8 +31,6 @@ services:
       - btcpay_datadir:/datadir
       - btcpay_pluginsdir:/root/.btcpayserver/Plugins
       - ./data/wallet:/wallet
-      - tor_servicesdir:/var/lib/tor/hidden_services
-      - tor_torrcdir:/usr/local/etc/tor/
 
   wownerod:
     restart: unless-stopped
@@ -49,6 +40,8 @@ services:
     entrypoint: wownerod --rpc-bind-ip=0.0.0.0 --confirm-external-bind --rpc-bind-port=34568 --non-interactive --block-notify="/usr/bin/curl -s -X GET http://btcpayserver:49392/wownerolikedaemoncallback/block?cryptoCode=wow&hash=%s" --hide-my-port --enable-dns-blocklist
     expose:
       - 34568
+    ports:
+      - 0.0.0.0:34568:34568
     volumes:
       - ${DATA_PATH:-./data/blockchain}:/root/.wownero
 
@@ -77,42 +70,10 @@ services:
     volumes:
       - postgres_datadir:/var/lib/postgresql/data
 
-  tor:
-    restart: unless-stopped
-    image: btcpayserver/tor:0.4.8.10
-    container_name: btcpayserver_tor
-    environment:
-      TOR_PASSWORD: btcpayserver
-      TOR_ADDITIONAL_CONFIG: /usr/local/etc/tor/torrc-2
-      TOR_EXTRA_ARGS: |
-        CookieAuthentication 1
-    expose:
-      - 9050
-      - 9051
-    volumes:
-      - tor_datadir:/home/tor/.tor
-      - tor_torrcdir:/usr/local/etc/tor
-      - tor_servicesdir:/var/lib/tor/hidden_services
-
-  tor-gen:
-    restart: unless-stopped
-    image: btcpayserver/docker-gen:0.10.7
-    container_name: btcpayserver_tor-gen
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./torrc.tmpl:/etc/docker-gen/templates/torrc.tmpl:ro
-      - tor_torrcdir:/usr/local/etc/tor
-    entrypoint: /usr/local/bin/docker-gen -notify-sighup tor -watch -wait 5s:30s /etc/docker-gen/templates/torrc.tmpl /usr/local/etc/tor/torrc-2
-    links:
-      - tor
-
 volumes:
   btcpay_datadir:
   btcpay_pluginsdir:
   postgres_datadir:
-  tor_datadir:
-  tor_torrcdir:
-  tor_servicesdir:
 
 networks: {}
 
