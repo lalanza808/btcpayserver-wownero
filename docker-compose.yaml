@@ -9,7 +9,6 @@ services:
       - 49392
     environment:
       BTCPAY_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=btcpayserver;Database=btcpayserver${NBITCOIN_NETWORK:-mainnet}
-      BTCPAY_EXPLORERPOSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=btcpayserver;MaxPoolSize=80;Database=nbxplorer${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_NETWORK: ${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_BIND: 0.0.0.0:49392
       BTCPAY_ROOTPATH: ${BTCPAY_ROOTPATH:-/}
@@ -21,9 +20,8 @@ services:
       BTCPAY_UPDATEURLz: https://api.github.com/repos/btcpayserver/btcpayserver/releases/latest
       BTCPAY_DOCKERDEPLOYMENT: true
       BTCPAY_CHAINS: wow
-      BTCPAYGEN_CRYPTO1: xmr
       BTCPAY_WOW_DAEMON_URI: http://wownerod:34568
-      BTCPAY_WOW_WALLET_DAEMON_URI: http://wownerod_wallet:8000
+      BTCPAY_WOW_WALLET_DAEMON_URI: http://wallet:8000
       BTCPAY_WOW_WALLET_DAEMON_WALLETDIR: /wallet
       HIDDENSERVICE_NAME: BTCPayServer
       HIDDENSERVICE_REVERSEPROXY: nginx
@@ -38,7 +36,6 @@ services:
       - postgres
     volumes:
       - btcpay_datadir:/datadir
-      - nbxplorer_datadir:/root/.nbxplorer
       - btcpay_pluginsdir:/root/.btcpayserver/Plugins
       - ./data/wallet:/wallet
       - tor_servicesdir:/var/lib/tor/hidden_services
@@ -53,38 +50,21 @@ services:
     expose:
       - 34568
     volumes:
-      - ${DATA_PATH:-./data/lmdb}:/root/.wownero
+      - ${DATA_PATH:-./data/blockchain}:/root/.wownero
 
   wallet:
     restart: unless-stopped
     build:
       context: .
     container_name: btcpayserver_wallet
-    command:
-      bash /run_wallet.sh "${WALLET_PASS:-walletpass}" "http://wownerod:34568"
     expose:
-      - 34568
+      - 8000
     volumes:
       - ./data/wallet:/wallet
     depends_on:
       - wownerod
-
-  nbxplorer:
-    restart: unless-stopped
-    image: nicolasdorier/nbxplorer:2.5.14
-    container_name: btcpayserver_nbxplorer
-    expose:
-    - 32838
-    environment:
-      NBXPLORER_NETWORK: ${NBITCOIN_NETWORK:-mainnet}
-      NBXPLORER_BIND: 0.0.0.0:32838
-      NBXPLORER_TRIMEVENTS: 10000
-      NBXPLORER_SIGNALFILESDIR: /datadir
-      NBXPLORER_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorer${NBITCOIN_NETWORK:-mainnet}
-    links:
-      - postgres
-    volumes:
-      - nbxplorer_datadir:/datadir
+    command:
+      bash /run_wallet.sh "http://wownerod:34568" "${WALLET_PASS:-walletpass}"
 
   postgres:
     restart: unless-stopped
@@ -129,8 +109,6 @@ services:
 volumes:
   btcpay_datadir:
   btcpay_pluginsdir:
-  xmr_data:
-  nbxplorer_datadir:
   postgres_datadir:
   tor_datadir:
   tor_torrcdir:

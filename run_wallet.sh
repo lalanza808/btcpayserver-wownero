@@ -1,11 +1,10 @@
 #!/bin/bash
 
 
-export WALLET_CREDS="${1}"
-export DAEMON_URI="${2}"
+export DAEMON_URI="${1}"
+export WALLET_CREDS="${2}"
 export WALLET_FILE="/wallet/wallet"
 export PASSWORD_FILE="/wallet/password"
-
 
 # Create new wallet if it doesn't exist
 if [[ ! -f ${WALLET_FILE} ]]; then
@@ -25,6 +24,7 @@ wownero-wallet-rpc \
   --daemon-address ${DAEMON_URI} \
   --wallet-file ${WALLET_FILE} \
   --password-file ${PASSWORD_FILE} \
+  --disable-rpc-login \
   --rpc-bind-port 8000 \
   --rpc-bind-ip 0.0.0.0 \
   --confirm-external-bind \
