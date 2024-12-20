@@ -8,6 +8,7 @@ services:
     environment:
       BTCPAY_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=btcpayserver;Database=btcpayserver${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_NETWORK: ${NBITCOIN_NETWORK:-mainnet}
+      BTCPAY_HOST: ${BTCPAY_HOST}
       BTCPAY_BIND: 0.0.0.0:49392
       BTCPAY_ROOTPATH: ${BTCPAY_ROOTPATH:-/}
       BTCPAY_SSHCONNECTION: root@host.docker.internal
