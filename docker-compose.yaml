@@ -2,9 +2,7 @@ services:
 
   btcpayserver:
     restart: unless-stopped
-    build:
-      context: btcpayserver
-    container_name: btcpayserver
+    image: lalanza808/btcpayserver-wownero:v2.0.4
     expose:
       - 49392
     environment:
@@ -34,8 +32,7 @@ services:
 
   wownerod:
     restart: unless-stopped
-    build:
-      context: .
+    image: lalanza808/btcpayserver-wownero-wallet:v0.11.3.0
     container_name: btcpayserver_wownerod
     entrypoint: wownerod --rpc-bind-ip=0.0.0.0 --confirm-external-bind --rpc-bind-port=34568 --non-interactive --block-notify="/usr/bin/curl -s -X GET http://btcpayserver:49392/wownerolikedaemoncallback/block?cryptoCode=wow&hash=%s" --hide-my-port --enable-dns-blocklist
     expose:
@@ -47,8 +44,7 @@ services:
 
   wallet:
     restart: unless-stopped
-    build:
-      context: .
+    image: lalanza808/btcpayserver-wownero-wallet:v0.11.3.0
     container_name: btcpayserver_wallet
     expose:
       - 8000
