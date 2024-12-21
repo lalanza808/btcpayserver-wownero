@@ -5,6 +5,7 @@ export DAEMON_URI="${1}"
 export WALLET_CREDS="${2}"
 export WALLET_FILE="/wallet/wallet"
 export PASSWORD_FILE="/wallet/password"
+export INIT_LOG="/wallet/init.log"
 
 # Create new wallet if it doesn't exist
 if [[ ! -f ${WALLET_FILE} ]]; then
@@ -16,7 +17,8 @@ if [[ ! -f ${WALLET_FILE} ]]; then
     --trusted-daemon \
     --use-english-language-names \
     --mnemonic-language English \
-    --command status
+    --command status \
+    | tee ${INIT_LOG}
 fi
 
 # Run RPC wallet
