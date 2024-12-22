@@ -2,7 +2,11 @@
 
 This repo sets up a new [BTCPayServer](https://btcpayserver.org/) for Wownero!
 
-<img src="preview.png" width=600>
+<img src="./images/dashboard.png" width=600>
+<img src="./images/invoices.png" width=600>
+<img src="./images/reportin.png" width=600>
+<img src="./images/crowdfunding.png" width=600>
+<img src="./images/payment.png" width=600>
 
 
 ## Launch A Web Store
@@ -33,7 +37,7 @@ Use [Wowlet](https://wowlet.app) to create a new wallet. Use the GUI to "Create 
 
 In the BTCPayServer wallet settings you will have an upload form to upload your wallet file, keys file, and password.
 
-![](https://sethforprivacy.com/accepting-monero-via-btcpay-server/upload_monero_wallet_files.png#center)
+<img src="https://sethforprivacy.com/accepting-monero-via-btcpay-server/upload_monero_wallet_files.png" width=600>
 
 Read this guide for more information on setting it up: https://sethforprivacy.com/guides/accepting-monero-via-btcpay-server/#create-a-view-only-monero-wallet-via-feather-wallet
 
