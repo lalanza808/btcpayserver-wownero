@@ -3,6 +3,8 @@ services:
   btcpayserver:
     restart: unless-stopped
     image: lalanza808/btcpayserver-wownero:v2.0.4
+    # build:
+    #   context: btcpayserver
     environment:
       BTCPAY_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=btcpayserver;Database=btcpayserver${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_NETWORK: ${NBITCOIN_NETWORK:-mainnet}
@@ -32,11 +34,13 @@ services:
   wallet:
     restart: unless-stopped
     image: lalanza808/btcpayserver-wownero-wallet:v0.11.3.0
+    # build:
+    #   context: .
     container_name: btcpayserver_wallet
     volumes:
       - ./data/wallet:/wallet
     command:
-      bash /run_wallet.sh "${WOW_DAEMON_URI:-http://node.suchwow.xyz:34568}" "${WOW_WALLET_PASS:-walletpass}"
+      bash /run_wallet.sh "${WOW_DAEMON_URI:-http://node.suchwow.xyz:34568}"
 
   postgres:
     restart: unless-stopped
