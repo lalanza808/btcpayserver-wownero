@@ -146,7 +146,7 @@ server {
         proxy_buffering off;
     }
 
-    location /tor {
+    location /tor/ {
         alias /var/www/tor/;
     }
 
@@ -182,7 +182,5 @@ sed -i 's/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 128;/'
 service nginx start
 
 # Final output
-echo -e "\n\n[+] Wallet seed details"
-cat /opt/btcpay/data/wallet/init.log
 echo -e "\nOnion site for BTCPayServer: $(cat /var/lib/tor/btcpayserver/hostname)"
 echo -e "\nYou may now setup your BTCPayServer at ${BTCPAY_HOST}"
