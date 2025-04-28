@@ -19,7 +19,7 @@ services:
       BTCPAY_UPDATEURL: https://api.github.com/repos/lalanza808/btcpayserver/releases/latest
       BTCPAY_DOCKERDEPLOYMENT: true
       BTCPAY_CHAINS: wow
-      BTCPAY_WOW_DAEMON_URI: ${WOW_DAEMON_URI:-http://node.suchwow.xyz:34568}
+      BTCPAY_WOW_DAEMON_URI: ${WOW_DAEMON_URI:-https://wownero.stackwallet.com:34568}
       BTCPAY_WOW_WALLET_DAEMON_URI: http://wallet:8000
       BTCPAY_WOW_WALLET_DAEMON_WALLETDIR: /wallet/wow
     ports:
@@ -40,7 +40,7 @@ services:
     volumes:
       - ./data/wallet:/wallet
     command:
-      bash /run_wallet.sh "${WOW_DAEMON_URI:-http://node.suchwow.xyz:34568}"
+      bash /run_wallet.sh "${WOW_DAEMON_URI:-https://wownero.stackwallet.com:34568}"
 
   postgres:
     restart: unless-stopped
