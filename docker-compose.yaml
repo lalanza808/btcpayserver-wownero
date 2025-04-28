@@ -3,8 +3,8 @@ services:
   btcpayserver:
     restart: unless-stopped
     image: lalanza808/btcpayserver-wownero:v2.0.4
-    # build:
-    #   context: btcpayserver
+    build:
+      context: btcpayserver
     environment:
       BTCPAY_POSTGRES: User ID=postgres;Host=postgres;Port=5432;Application Name=btcpayserver;Database=btcpayserver${NBITCOIN_NETWORK:-mainnet}
       BTCPAY_NETWORK: ${NBITCOIN_NETWORK:-mainnet}
@@ -34,8 +34,8 @@ services:
   wallet:
     restart: unless-stopped
     image: lalanza808/btcpayserver-wownero-wallet:v0.11.3.0
-    # build:
-    #   context: .
+    build:
+      context: .
     container_name: btcpayserver_wallet
     volumes:
       - ./data/wallet:/wallet
